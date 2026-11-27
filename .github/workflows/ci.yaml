@@ -68,7 +68,12 @@ jobs:
           DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DH_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          printf '%s' "$DH_TOKEN" | tr -d '\r\n' | docker login docker.io -u "$DH_USER" --password-stdin
+          printf '%s' "$DH_TOKEN" | tr -d '\r\n' | docker login docker.io -u "$DH_USER" --password-stdin      - name: Log in to Docker Hub
+        env:
+          DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DH_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          printf '%s' "$DH_TOKEN" | docker login -u "$DH_USER" --password-stdin
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
