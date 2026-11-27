@@ -16,7 +16,7 @@ public class BookController {
   }
   @GetMapping("/version")
   public Map<String,String> version() {
-    return Map.of("app","book-api","version",version,"message","Hello GitOps v1");
+    return Map.of("app","book-api","version",version,"message","Hello GitOps v2");
   }
   @GetMapping("/books") public List<Book> list() { return service.findAll(); }
   @GetMapping("/books/{id}") public ResponseEntity<Book> get(@PathVariable Long id) {
