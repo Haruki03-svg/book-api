@@ -69,26 +69,6 @@ jobs:
           DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DH_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          STATUS=$(curl -sS -o /dev/null -w '%{http_code}' \
-            -u "$DH_USER:$DH_TOKEN" \
-            --get \
-            --data-urlencode "service=registry.docker.io" \
-            --data-urlencode "scope=repository:Gando03/book-api:pull,push" \
-            https://auth.docker.io/token)
-
-          echo "Docker Hub auth HTTP status: $STATUS"
-
-          if [ "$STATUS" != "200" ]; then
-            echo "Docker Hub authentication failed"
-            exit 1
-          fi
-
-          echo "Docker Hub authentication successful"
-      - name: Test Docker Hub authentication
-        env:
-          DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-          DH_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: |
           BODY=$(mktemp)
 
           STATUS=$(curl -sS -o "$BODY" -w '%{http_code}' \
