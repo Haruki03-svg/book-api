@@ -27,6 +27,26 @@ jobs:
         id: vars
         run: echo "tag=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Validate Docker Hub secrets
+        env:
+          DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DH_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "Docker Hub username: ${DH_USER:-MISSING}"
+          echo "Token length: ${#DH_TOKEN}"
+
+          if [ -z "$DH_USER" ] || [ -z "$DH_TOKEN" ]; then
+            echo "ERROR: One or more secrets are missing"
+            exit 1
+          fi
+
+          case "$DH_TOKEN" in
+            dckr_pat_*) echo "Token format: Docker Hub PAT" ;;
+            *) echo "Token format: Unexpected prefix" ;;
+          esac
+
+          echo "Secret presence check passed"
+
       - name: Test Docker Hub authentication
         env:
           DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -47,13 +67,13 @@ jobs:
           echo "Docker Hub auth HTTP status: $STATUS"
 
           if [ "$STATUS" != "200" ]; then
-            echo "Authentication error details:"
+            echo "Authentication failed"
             cat "$BODY"
             rm -f "$BODY"
             exit 1
           fi
 
-          echo "Docker Hub credentials verified successfully"
+          echo "Docker Hub authentication successful"
           rm -f "$BODY"
 
       - name: Log in to Docker Hub
