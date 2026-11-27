@@ -47,6 +47,31 @@ jobs:
 
           echo "Secret presence check passed"
 
+      - name: Verify GitOps token permissions
+        env:
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+        run: |
+          if [ -z "$GITOPS_TOKEN" ]; then
+            echo "GITOPS_TOKEN: FAIL (missing)"
+            exit 1
+          fi
+
+          BODY=$(mktemp)
+          STATUS=$(curl -sS -o "$BODY" -w '%{http_code}' \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITOPS_TOKEN" \
+            https://api.github.com/repos/Haruki03-svg/book-api-gitops)
+
+          CAN_PUSH=$(jq -r '.permissions.push // false' "$BODY")
+          rm -f "$BODY"
+
+          if [ "$STATUS" = "200" ] && [ "$CAN_PUSH" = "true" ]; then
+            echo "GITOPS_TOKEN: PASS"
+          else
+            echo "GITOPS_TOKEN: FAIL (HTTP $STATUS)"
+            exit 1
+          fi
+
       - name: Test Docker Hub authentication
         env:
           DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
